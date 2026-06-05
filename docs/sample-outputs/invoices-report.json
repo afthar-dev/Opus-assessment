@@ -1,0 +1,68 @@
+{
+  "sourceFile": "sample-invoices.xlsx",
+  "fileType": "INVOICE",
+  "status": "PARTIAL_SUCCESS",
+  "summary": {
+    "totalRows": 4,
+    "acceptedRows": 0,
+    "quarantinedRows": 4,
+    "headerRowDetected": 1
+  },
+  "acceptedRecords": [],
+  "quarantineRows": [
+    {
+      "sourceRow": 2,
+      "reasonCodes": ["DUPLICATE_RECORD"],
+      "errors": [
+        {
+          "code": "DUPLICATE_RECORD",
+          "field": "invoiceNumber",
+          "rawValue": "INV-1",
+          "message": "Duplicate invoice detected"
+        }
+      ]
+    },
+    {
+      "sourceRow": 3,
+      "reasonCodes": ["INVALID_AMOUNT", "UNKNOWN_STATUS"],
+      "errors": [
+        {
+          "code": "INVALID_AMOUNT",
+          "field": "amount",
+          "rawValue": "abc",
+          "message": "Invalid amount"
+        },
+        {
+          "code": "UNKNOWN_STATUS",
+          "field": "paymentStatus",
+          "rawValue": "waiting",
+          "message": "Unknown payment status: WAITING"
+        }
+      ]
+    },
+    {
+      "sourceRow": 4,
+      "reasonCodes": ["DUPLICATE_RECORD"],
+      "errors": [
+        {
+          "code": "DUPLICATE_RECORD",
+          "field": "invoiceNumber",
+          "rawValue": "INV-1",
+          "message": "Duplicate invoice detected"
+        }
+      ]
+    },
+    {
+      "sourceRow": 5,
+      "reasonCodes": ["INVALID_DATE"],
+      "errors": [
+        {
+          "code": "INVALID_DATE",
+          "field": "invoiceDate",
+          "rawValue": "32/13/2025",
+          "message": "Invalid invoice date"
+        }
+      ]
+    }
+  ]
+}

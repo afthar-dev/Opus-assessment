@@ -1,0 +1,68 @@
+{
+  "sourceFile": "sample-tutor-assignments.xlsx",
+  "fileType": "TUTOR_ASSIGNMENT",
+  "status": "PARTIAL_SUCCESS",
+  "summary": {
+    "totalRows": 4,
+    "acceptedRows": 0,
+    "quarantinedRows": 4,
+    "headerRowDetected": 1
+  },
+  "acceptedRecords": [],
+  "quarantineRows": [
+    {
+      "sourceRow": 2,
+      "reasonCodes": ["NEAR_DUPLICATE"],
+      "errors": [
+        {
+          "code": "NEAR_DUPLICATE",
+          "field": "hourlyRate",
+          "rawValue": "Alice Tan|Bob Lee|2026-04-01",
+          "message": "Near duplicate assignment"
+        }
+      ]
+    },
+    {
+      "sourceRow": 3,
+      "reasonCodes": ["NEAR_DUPLICATE"],
+      "errors": [
+        {
+          "code": "NEAR_DUPLICATE",
+          "field": "hourlyRate",
+          "rawValue": "Alice Tan|Bob Lee|2026-04-01",
+          "message": "Near duplicate assignment"
+        }
+      ]
+    },
+    {
+      "sourceRow": 4,
+      "reasonCodes": ["NEAR_DUPLICATE"],
+      "errors": [
+        {
+          "code": "NEAR_DUPLICATE",
+          "field": "hourlyRate",
+          "rawValue": "Alice Tan|Bob Lee|2026-04-01",
+          "message": "Near duplicate assignment"
+        }
+      ]
+    },
+    {
+      "sourceRow": 5,
+      "reasonCodes": ["UNKNOWN_SUBJECT", "INVALID_RATE"],
+      "errors": [
+        {
+          "code": "UNKNOWN_SUBJECT",
+          "field": "subject",
+          "rawValue": "Astrology",
+          "message": "Unknown subject"
+        },
+        {
+          "code": "INVALID_RATE",
+          "field": "hourlyRate",
+          "rawValue": "abc",
+          "message": "Invalid hourly rate"
+        }
+      ]
+    }
+  ]
+}

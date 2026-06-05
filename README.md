@@ -1,144 +1,36 @@
 # OPUS Assessment
 
-Full-stack upload processing app for validating Excel files, storing accepted records, and reviewing quarantined rows that need correction.
+Full-stack upload processing app for validating Excel workbooks, storing accepted rows, and quarantining rows that need correction.
 
-The project is split into a React client and an Express API. The server detects supported workbook types, maps rows into domain records, cleans and validates values, stores valid rows in PostgreSQL through Prisma, and keeps invalid rows in quarantine for review.
+## Clone to Running in Under 10 Minutes
 
-## Features
-
-- Excel upload support for `.xls` and `.xlsx` files.
-- Automatic file-type detection for tutor assignments, lesson logs, and invoices.
-- Header detection and column mapping for structured workbooks.
-- Cleaning for dates, currency values, statuses, subjects, and numeric fields.
-- Validation for required fields, invalid values, duplicates, and near duplicates.
-- Quarantine workflow for invalid rows with preview revalidation before final correction.
-- Upload history, record browsing, pagination, and upload deletion.
-- React dashboard for uploading files, viewing reports, and correcting quarantined records.
-
-## Tech Stack
-
-| Area       | Tools                                                                  |
-| ---------- | ---------------------------------------------------------------------- |
-| Client     | React 19, TypeScript, Vite, Tailwind CSS, Zustand, Axios, Lucide React |
-| Server     | Node.js, Express 5, TypeScript, Prisma, PostgreSQL, Multer, XLSX       |
-| Validation | Custom cleaning and validation services                                |
-| Testing    | Node test runner with `tsx`                                            |
-
-## Project Structure
-
-```text
-.
-+-- client/
-|   +-- src/api/              # API client modules
-|   +-- src/components/       # Shared UI components
-|   +-- src/pages/            # Main application pages
-|   +-- src/routes/           # React routes
-|   +-- src/store/            # Client state
-+-- server/
-|   +-- prisma/               # Prisma schema and migrations
-|   +-- src/controllers/      # HTTP handlers
-|   +-- src/routes/           # Express routes
-|   +-- src/services/         # Upload, parsing, cleaning, validation, storage
-|   +-- src/lib/              # Prisma client setup
-|   +-- tests/                # Service-level regression tests
-+-- README.md
-```
-
-## Supported File Types
-
-### Tutor Assignments
-
-Detected from headers such as assignment ID, tutor name, student name, subject, level, and hourly rate.
-
-Expected mapped fields:
-
-- `assignmentCode`
-- `tutorName`
-- `studentName`
-- `subject`
-- `level`
-- `hourlyRate`
-- `startDate`
-- `status`
-- `contactEmail`
-
-### Invoices
-
-Detected from headers such as invoice, invoice ID, invoice number, amount, payment status, and payment date.
-
-Expected mapped fields:
-
-- `invoiceNumber`
-- `tutorId`
-- `studentName`
-- `invoiceDate`
-- `amount`
-- `paymentStatus`
-- `paymentDate`
-- `notes`
-
-### Lesson Logs
-
-Detected from row patterns such as `LOG-001`, `TAS-001`, attendance values, durations, and fees.
-
-Expected mapped fields:
-
-- `logId`
-- `assignmentCode`
-- `lessonDate`
-- `durationHours`
-- `attendance`
-- `notes`
-- `fee`
-
-## Prerequisites
+Prerequisites:
 
 - Node.js 20 or newer
 - npm
 - PostgreSQL database
 
-## Environment Variables
-
-Create `server/.env`:
-
-```env
-DATABASE_URL="neon postgres db"
-PORT=5000
-```
-
-## Installation
-
-Install dependencies in both apps:
+Setup:
 
 ```bash
-cd server
-npm install
-
-cd ../client
-npm install
+git clone <repo-url>
+cd opus_assesment
+npm run setup
+copy .env.example server\.env
+copy client\.env.example client\.env
+npm --prefix server run prisma:migrate
 ```
 
-Run the database migration:
+Run the API:
 
 ```bash
-cd server
-npm run prisma:migrate
-```
-
-## Running Locally
-
-Start the API:
-
-```bash
-cd server
 npm run dev
 ```
 
-Start the client in a second terminal:
+Run the client in a second terminal:
 
 ```bash
-cd client
-npm run dev
+npm run dev:client
 ```
 
 Default URLs:
@@ -146,92 +38,93 @@ Default URLs:
 - Client: `http://localhost:5173`
 - API: `http://localhost:5000/api`
 
-## API Overview
+## One-Command Checks
 
-### Uploads
-
-| Method   | Route                                     | Description                                        |
-| -------- | ----------------------------------------- | -------------------------------------------------- |
-| `POST`   | `/api/upload`                             | Upload an Excel file using multipart field `file`  |
-| `GET`    | `/api/upload?page=1&limit=10`             | List uploaded files                                |
-| `GET`    | `/api/upload/:id`                         | Get one upload                                     |
-| `GET`    | `/api/upload/:id/records?page=1&limit=20` | Get accepted and quarantined records for an upload |
-| `DELETE` | `/api/upload/:id`                         | Delete an upload                                   |
-
-### Quarantine
-
-| Method  | Route                            | Description                                                    |
-| ------- | -------------------------------- | -------------------------------------------------------------- |
-| `GET`   | `/api/quarantine/:id`            | Get a quarantined row and its validation errors                |
-| `POST`  | `/api/quarantine/:id/revalidate` | Preview corrections without accepting the row                  |
-| `PATCH` | `/api/quarantine/:id`            | Apply valid corrections and move the row into accepted records |
-
-## Processing Flow
-
-1. The user uploads an Excel workbook.
-2. The server reads workbook rows and detects the file type.
-3. Headers are located when required by the file type.
-4. Rows are mapped into domain fields.
-5. Data is cleaned into consistent formats.
-6. Rows are validated.
-7. Valid rows are stored in their record table.
-8. Invalid rows are stored as quarantine rows with field-level errors.
-9. Corrections are revalidated before accepted rows are inserted.
-
-## Validation Notes
-
-- Invoice duplicates are checked by cleaned `invoiceNumber` within the same upload.
-- Lesson log duplicates use `assignmentCode` and `lessonDate`.
-- Tutor assignment duplicates use `tutorName`, `studentName`, and `startDate`.
-- Tutor assignments with the same identity but different rates are treated as near duplicates.
-- Unknown invoice payment statuses are reported but still pass through validation when present.
-
-## Scripts
-
-### Server
-
-| Command                   | Description                                   |
-| ------------------------- | --------------------------------------------- |
-| `npm run dev`             | Start the API with `tsx watch`                |
-| `npm run build`           | Generate Prisma client and compile TypeScript |
-| `npm run start`           | Run the compiled API from `dist`              |
-| `npm run prisma:generate` | Generate Prisma client                        |
-| `npm run prisma:migrate`  | Run Prisma migrations in development          |
-| `npm run prisma:studio`   | Open Prisma Studio                            |
-
-### Client
-
-| Command           | Description                     |
-| ----------------- | ------------------------------- |
-| `npm run dev`     | Start Vite dev server           |
-| `npm run build`   | Type-check and build the client |
-| `npm run lint`    | Run ESLint                      |
-| `npm run preview` | Preview the built client        |
-
-## Testing
-
-Run service-level tests from the server directory:
+Run all service tests:
 
 ```bash
-cd server
-node --import tsx --test tests/quarantine-correction.test.ts
-node --import tsx --test tests/validation-service-refactor.test.ts
-node --import tsx --test tests/lesson-log-cleaning-validation.test.ts
+npm test
 ```
 
-Run a production build check:
+Run production build checks:
 
 ```bash
-cd server
-npm run build
-
-cd ../client
 npm run build
 ```
 
-## Development Notes
+Install both apps from the root:
 
-- Uploaded files are written to `server/uploads`.
-- Prisma requires `DATABASE_URL` before migrations, generation, or server startup.
-- The correction preview endpoint and final patch endpoint share the same validation path, so preview results should match final acceptance behavior.
-- Keep new validation rules in the service layer where they can be covered by focused tests.
+```bash
+npm run setup
+```
+
+## Environment
+
+Root `.env.example` documents all local variables. Runtime env files are:
+
+- `server/.env` for `DATABASE_URL` and `PORT`
+- `client/.env` for `VITE_API_BASE_URL`
+
+The server fails fast when `DATABASE_URL` is missing, so database-dependent actions do not silently continue with an invalid configuration.
+
+## Project Structure
+
+```text
+src/              -> source code lives under server/src and client/src
+tests/            -> service test suite lives under server/tests
+docs/
+  architecture.md
+  api-reference.md
+  sample-outputs/
+.env.example
+README.md
+```
+
+## Supported Workbooks
+
+- Tutor assignments: assignment code, tutor, student, subject, rate, start date, status, contact email.
+- Lesson logs: log ID, assignment code, lesson date, duration, attendance, notes, fee.
+- Invoices: invoice number, tutor ID, student, invoice date, amount, payment status, payment date, notes.
+
+## Validation Coverage
+
+The test suite covers:
+
+- Date normalization across more than six input formats.
+- Duplicate detection for invoices, lesson logs, and tutor assignments.
+- Required-field pass and fail cases.
+- Currency stripping for `SGD`, `$`, commas, and whitespace.
+- Quarantine reason codes including `REQUIRED_FIELD_MISSING`, `INVALID_DATE`, `INVALID_AMOUNT`, `INVALID_DURATION`, `INVALID_FEE`, `INVALID_RATE`, `UNKNOWN_SUBJECT`, `UNKNOWN_STATUS`, `DUPLICATE_RECORD`, and `NEAR_DUPLICATE`.
+
+## API and Architecture Docs
+
+- Architecture: `docs/architecture.md`
+- API reference: `docs/api-reference.md`
+- Sample outputs: `docs/sample-outputs/`
+
+## Demo Video Checklist
+
+Record a five-minute walkthrough:
+
+1. Start API and client with the commands above.
+2. Upload a tutor assignment workbook and show accepted/quarantined counts.
+3. Upload a lesson log workbook and open the quarantine details.
+4. Upload an invoice workbook and show duplicate/currency/date reason codes.
+5. Open one report from `docs/sample-outputs/`.
+6. Make one API query, for example `GET http://localhost:5000/api/upload?page=1&limit=10`.
+
+## API Summary
+
+Uploads:
+
+- `POST /api/upload`
+- `GET /api/upload?page=1&limit=10`
+- `GET /api/upload/:id`
+- `GET /api/upload/:id/records?page=1&limit=20`
+- `DELETE /api/upload/:id`
+
+Quarantine:
+
+- `GET /api/quarantine/:id`
+- `POST /api/quarantine/:id/revalidate`
+- `PATCH /api/quarantine/:id`

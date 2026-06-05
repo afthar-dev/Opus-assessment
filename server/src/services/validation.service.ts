@@ -46,15 +46,17 @@ const CANONICAL_STATUSES = new Set(["PAID", "PENDING", "OVERDUE", "CANCELLED"]);
 const hasValue = (value: unknown) =>
   value !== null && value !== undefined && String(value).trim() !== "";
 
+const originalValue = (row: any, field: string) => row.__raw?.[field] ?? row[field];
+
 const addRequiredError = (
   errors: ValidationError[],
+  row: any,
   field: string,
-  value: unknown,
 ) => {
   errors.push({
     code: "REQUIRED_FIELD_MISSING",
     field,
-    value,
+    value: originalValue(row, field),
     message: `${field} is required`,
   });
 };
@@ -95,7 +97,7 @@ const validateInvoices = (rows: any[]): ValidationResult => {
     const errors: ValidationError[] = [];
 
     if (!hasValue(row.invoiceNumber)) {
-      addRequiredError(errors, "invoiceNumber", row.invoiceNumber);
+      addRequiredError(errors, row, "invoiceNumber");
     } else if ((keyFreq.get(row.invoiceNumber) ?? 0) > 1) {
       errors.push({
         code: "DUPLICATE_RECORD",
@@ -109,7 +111,7 @@ const validateInvoices = (rows: any[]): ValidationResult => {
       errors.push({
         code: "INVALID_DATE",
         field: "invoiceDate",
-        value: row.invoiceDate,
+        value: originalValue(row, "invoiceDate"),
         message: "Invalid invoice date",
       });
     }
@@ -118,7 +120,7 @@ const validateInvoices = (rows: any[]): ValidationResult => {
       errors.push({
         code: "INVALID_AMOUNT",
         field: "amount",
-        value: row.amount,
+        value: originalValue(row, "amount"),
         message: "Invalid amount",
       });
     }
@@ -134,7 +136,7 @@ const validateInvoices = (rows: any[]): ValidationResult => {
       errors.push({
         code: "UNKNOWN_STATUS",
         field: "paymentStatus",
-        value: row.paymentStatus,
+        value: originalValue(row, "paymentStatus"),
         message: `Unknown payment status: ${row.paymentStatus}`,
       });
     }
@@ -167,14 +169,14 @@ const validateLessonLogs = (rows: any[]): ValidationResult => {
     const errors: ValidationError[] = [];
 
     if (!hasValue(row.assignmentCode)) {
-      addRequiredError(errors, "assignmentCode", row.assignmentCode);
+      addRequiredError(errors, row, "assignmentCode");
     }
 
     if (!hasValue(row.lessonDate)) {
       errors.push({
         code: "INVALID_DATE",
         field: "lessonDate",
-        value: row.lessonDate,
+        value: originalValue(row, "lessonDate"),
         message: "Invalid lesson date",
       });
     }
@@ -183,7 +185,7 @@ const validateLessonLogs = (rows: any[]): ValidationResult => {
       errors.push({
         code: "INVALID_DURATION",
         field: "durationHours",
-        value: row.durationHours,
+        value: originalValue(row, "durationHours"),
         message: "Duration must be greater than zero",
       });
     }
@@ -192,7 +194,7 @@ const validateLessonLogs = (rows: any[]): ValidationResult => {
       errors.push({
         code: "INVALID_FEE",
         field: "fee",
-        value: row.fee,
+        value: originalValue(row, "fee"),
         message: "Invalid fee",
       });
     }
@@ -255,18 +257,18 @@ const validateTutorAssignments = (rows: any[]): ValidationResult => {
     const errors: ValidationError[] = [];
 
     if (!hasValue(row.tutorName)) {
-      addRequiredError(errors, "tutorName", row.tutorName);
+      addRequiredError(errors, row, "tutorName");
     }
 
     if (!hasValue(row.studentName)) {
-      addRequiredError(errors, "studentName", row.studentName);
+      addRequiredError(errors, row, "studentName");
     }
 
     if (!CANONICAL_SUBJECTS.has(row.subject)) {
       errors.push({
         code: "UNKNOWN_SUBJECT",
         field: "subject",
-        value: row.subject,
+        value: originalValue(row, "subject"),
         message: "Unknown subject",
       });
     }
@@ -275,7 +277,7 @@ const validateTutorAssignments = (rows: any[]): ValidationResult => {
       errors.push({
         code: "INVALID_RATE",
         field: "hourlyRate",
-        value: row.hourlyRate,
+        value: originalValue(row, "hourlyRate"),
         message: "Invalid hourly rate",
       });
     }
@@ -284,7 +286,7 @@ const validateTutorAssignments = (rows: any[]): ValidationResult => {
       errors.push({
         code: "INVALID_DATE",
         field: "startDate",
-        value: row.startDate,
+        value: originalValue(row, "startDate"),
         message: "Invalid start date",
       });
     }

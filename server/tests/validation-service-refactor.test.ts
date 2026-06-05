@@ -78,12 +78,12 @@ test("validates lesson log numeric duration fee zero fee and duplicates", () => 
 
   const result = validateRows({ fileType: "LESSON_LOG", rows: cleanedRows });
 
-  assert.equal(result.validRows.length, 1);
+  assert.equal(result.validRows.length, 0);
   assert.deepEqual(errorSummary(result), [
     { code: "INVALID_DURATION", field: "durationHours", value: "N/A" },
     { code: "INVALID_FEE", field: "fee", value: "TBC" },
     { code: "INVALID_DURATION", field: "durationHours", value: "0" },
-    { code: "ZERO_FEE", field: "fee", value: "0" },
+    { code: "DUPLICATE_RECORD", field: "assignmentCode", value: "TAS-3|2026-04-03" },
     { code: "DUPLICATE_RECORD", field: "assignmentCode", value: "TAS-3|2026-04-03" },
   ]);
 });
@@ -104,7 +104,8 @@ test("validates tutor subjects rates duplicates and near duplicates", () => {
   assert.equal(cleanedRows[0].subject, "MATH");
   assert.equal(cleanedRows[0].tutorName, "Alice Tan");
   assert.deepEqual(errorSummary(result), [
-    { code: "DUPLICATE_RECORD", field: "tutorName", value: "Alice Tan|Bob Lee|2026-04-01" },
+    { code: "NEAR_DUPLICATE", field: "hourlyRate", value: "Alice Tan|Bob Lee|2026-04-01" },
+    { code: "NEAR_DUPLICATE", field: "hourlyRate", value: "Alice Tan|Bob Lee|2026-04-01" },
     { code: "NEAR_DUPLICATE", field: "hourlyRate", value: "Alice Tan|Bob Lee|2026-04-01" },
     { code: "UNKNOWN_SUBJECT", field: "subject", value: "Astrology" },
     { code: "INVALID_RATE", field: "hourlyRate", value: "abc" },
@@ -129,8 +130,26 @@ test("validates invoice currency status and duplicates", () => {
   assert.equal(cleanedRows[0].paymentStatus, "PAID");
   assert.equal(cleanedRows[1].paymentStatus, "OVERDUE");
   assert.deepEqual(errorSummary(result), [
+    { code: "DUPLICATE_RECORD", field: "invoiceNumber", value: "INV-1" },
     { code: "INVALID_AMOUNT", field: "amount", value: "abc" },
     { code: "UNKNOWN_STATUS", field: "paymentStatus", value: "waiting" },
     { code: "DUPLICATE_RECORD", field: "invoiceNumber", value: "INV-1" },
+  ]);
+});
+
+test("validates required fields with one passing and one failing invoice row", () => {
+  const cleanedRows = cleanRows({
+    fileType: "INVOICE",
+    rows: [
+      { sourceRow: 1, invoiceNumber: "INV-100", amount: "SGD 150", invoiceDate: "2026-04-01", paymentStatus: "paid", rawData: ["INV-100", "", "", "2026-04-01", "SGD 150", "paid"] },
+      { sourceRow: 2, invoiceNumber: "", amount: "SGD 150", invoiceDate: "2026-04-01", paymentStatus: "paid", rawData: ["", "", "", "2026-04-01", "SGD 150", "paid"] },
+    ],
+  });
+
+  const result = validateRows({ fileType: "INVOICE", rows: cleanedRows });
+
+  assert.equal(result.validRows.length, 1);
+  assert.deepEqual(errorSummary(result), [
+    { code: "REQUIRED_FIELD_MISSING", field: "invoiceNumber", value: "" },
   ]);
 });

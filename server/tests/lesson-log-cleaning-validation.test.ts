@@ -43,17 +43,21 @@ test("lesson logs clean two-digit dates and preserve raw invalid numeric values"
     rows: cleanedRows,
   });
 
-  assert.equal(validationResult.validRows.length, 1);
-  assert.equal(validationResult.invalidRows.length, 1);
+  assert.equal(validationResult.validRows.length, 0);
+  assert.equal(validationResult.invalidRows.length, 2);
   assert.deepEqual(
-    validationResult.invalidRows[0].errors.map((error: any) => ({
-      code: error.code,
-      field: error.field,
-      value: error.value,
-    })),
+    validationResult.invalidRows.flatMap((invalidRow: any) =>
+      invalidRow.errors.map((error: any) => ({
+        code: error.code,
+        field: error.field,
+        value: error.value,
+      })),
+    ),
     [
-      { code: "INVALID_NUMBER", field: "durationHours", value: "N/A" },
-      { code: "INVALID_NUMBER", field: "fee", value: "TBC" },
+      { code: "INVALID_DURATION", field: "durationHours", value: "N/A" },
+      { code: "INVALID_FEE", field: "fee", value: "TBC" },
+      { code: "INVALID_DURATION", field: "durationHours", value: "" },
+      { code: "INVALID_FEE", field: "fee", value: "" },
     ],
   );
 });

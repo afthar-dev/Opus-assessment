@@ -177,32 +177,48 @@ const getMeaningfulCellCount = (row: any) => {
 const removeNonDataRows = (rows: any[]) =>
   rows.filter((row) => getMeaningfulCellCount(row) > 1);
 
+const withRawSnapshot = (row: any) => ({
+  ...row,
+  __raw: { ...row },
+});
+
 const cleanInvoices = (rows: any[]) =>
   removeNonDataRows(rows).map((row) => ({
-    ...row,
+    ...withRawSnapshot(row),
     invoiceNumber: cleanText(row.invoiceNumber),
+    tutorId: cleanText(row.tutorId),
+    studentName: cleanText(row.studentName),
     invoiceDate: cleanDate(row.invoiceDate),
     amount: cleanCurrency(row.amount),
     paymentStatus: cleanStatus(row.paymentStatus),
+    paymentDate: cleanDate(row.paymentDate),
+    notes: cleanText(row.notes),
   }));
 
 const cleanLessonLogs = (rows: any[]) =>
   removeNonDataRows(rows).map((row) => ({
-    ...row,
+    ...withRawSnapshot(row),
+    logId: cleanText(row.logId),
     assignmentCode: cleanText(row.assignmentCode),
     lessonDate: cleanDate(row.lessonDate),
     durationHours: cleanNumber(row.durationHours),
+    attendance: cleanStatus(row.attendance),
+    notes: cleanText(row.notes),
     fee: cleanCurrency(row.fee),
   }));
 
 const cleanTutorAssignments = (rows: any[]) =>
   removeNonDataRows(rows).map((row) => ({
-    ...row,
+    ...withRawSnapshot(row),
+    assignmentCode: cleanText(row.assignmentCode),
     tutorName: cleanText(row.tutorName),
     studentName: cleanText(row.studentName),
     subject: cleanSubject(row.subject),
+    level: cleanText(row.level),
     hourlyRate: cleanCurrency(row.hourlyRate),
     startDate: cleanDate(row.startDate),
+    status: cleanText(row.status),
+    contactEmail: cleanText(row.contactEmail),
   }));
 
 export const cleanRows = ({ fileType, rows }: CleanRowsInput) => {

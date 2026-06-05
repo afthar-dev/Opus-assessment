@@ -1,0 +1,68 @@
+{
+  "sourceFile": "sample-lesson-logs.xlsx",
+  "fileType": "LESSON_LOG",
+  "status": "PARTIAL_SUCCESS",
+  "summary": {
+    "totalRows": 4,
+    "acceptedRows": 0,
+    "quarantinedRows": 4,
+    "headerRowDetected": null
+  },
+  "acceptedRecords": [],
+  "quarantineRows": [
+    {
+      "sourceRow": 2,
+      "reasonCodes": ["INVALID_DURATION", "INVALID_FEE"],
+      "errors": [
+        {
+          "code": "INVALID_DURATION",
+          "field": "durationHours",
+          "rawValue": "N/A",
+          "message": "Duration must be greater than zero"
+        },
+        {
+          "code": "INVALID_FEE",
+          "field": "fee",
+          "rawValue": "TBC",
+          "message": "Invalid fee"
+        }
+      ]
+    },
+    {
+      "sourceRow": 3,
+      "reasonCodes": ["INVALID_DURATION"],
+      "errors": [
+        {
+          "code": "INVALID_DURATION",
+          "field": "durationHours",
+          "rawValue": "0",
+          "message": "Duration must be greater than zero"
+        }
+      ]
+    },
+    {
+      "sourceRow": 4,
+      "reasonCodes": ["DUPLICATE_RECORD"],
+      "errors": [
+        {
+          "code": "DUPLICATE_RECORD",
+          "field": "assignmentCode",
+          "rawValue": "TAS-3|2026-04-03",
+          "message": "Duplicate lesson log"
+        }
+      ]
+    },
+    {
+      "sourceRow": 5,
+      "reasonCodes": ["DUPLICATE_RECORD"],
+      "errors": [
+        {
+          "code": "DUPLICATE_RECORD",
+          "field": "assignmentCode",
+          "rawValue": "TAS-3|2026-04-03",
+          "message": "Duplicate lesson log"
+        }
+      ]
+    }
+  ]
+}
