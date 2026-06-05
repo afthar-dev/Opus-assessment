@@ -8,3 +8,4 @@ prisma.config.d.ts.map
 .env
 
 /src/generated/prisma
+server.log
