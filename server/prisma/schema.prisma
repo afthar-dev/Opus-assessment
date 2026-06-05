@@ -1,0 +1,227 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UploadStatus {
+  PROCESSING
+  COMPLETED
+  PARTIAL_SUCCESS
+  FAILED
+}
+
+enum QuarantineStatus {
+  PENDING
+  CORRECTED
+  REPROCESSED
+}
+
+model Upload {
+  id String @id @default(uuid())
+
+  fileName String
+  fileType String
+
+  status UploadStatus @default(PROCESSING)
+
+  totalRows       Int?
+  acceptedRows    Int?
+  quarantinedRows Int?
+
+  headerRowDetected Int?
+
+  processingDurationMs Int?
+
+  uploadedAt  DateTime  @default(now())
+  completedAt DateTime?
+
+  report ProcessingReport?
+
+  tutorAssignments TutorAssignment[]
+  lessonLogs       LessonLog[]
+  invoices         Invoice[]
+
+  quarantineRows QuarantineRow[]
+
+  @@index([status])
+  @@index([uploadedAt])
+  @@index([fileType])
+}
+
+model ProcessingReport {
+  id String @id @default(uuid())
+
+  uploadId String @unique
+  upload   Upload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+
+  totalRows       Int
+  acceptedRows    Int
+  quarantinedRows Int
+
+  generatedAt DateTime @default(now())
+}
+
+model QuarantineRow {
+  id String @id @default(uuid())
+
+  uploadId String
+  upload   Upload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+
+  rowNumber Int
+
+  rawData Json
+
+  status QuarantineStatus @default(PENDING)
+
+  correctedData Json?
+
+  correctedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  errors QuarantineError[]
+
+  @@index([uploadId])
+  @@index([rowNumber])
+  @@index([status])
+}
+
+model QuarantineError {
+  id String @id @default(uuid())
+
+  quarantineRowId String
+  quarantineRow   QuarantineRow @relation(fields: [quarantineRowId], references: [id], onDelete: Cascade)
+
+  code String
+
+  field String?
+
+  rawValue String?
+
+  message String
+
+  createdAt DateTime @default(now())
+
+  @@index([code])
+}
+
+model TutorAssignment {
+  id String @id @default(uuid())
+
+  uploadId String
+  upload   Upload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+
+  assignmentCode String
+
+  tutorName String
+
+  studentName String
+
+  subject String
+
+  level String?
+
+  hourlyRate Decimal @db.Decimal(10, 2)
+
+  startDate DateTime
+
+  status String
+
+  contactEmail String?
+
+  sourceRow Int?
+
+  rawData Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([uploadId])
+  @@index([startDate])
+  @@index([tutorName])
+  @@index([studentName])
+  @@index([subject])
+  @@index([assignmentCode])
+  // duplicate detection support
+  @@index([tutorName, studentName, startDate])
+}
+
+model LessonLog {
+  id String @id @default(uuid())
+
+  uploadId String
+  upload   Upload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+
+  logId String
+
+  assignmentCode String?
+
+  lessonDate DateTime
+
+  durationHours Decimal? @db.Decimal(5, 2)
+
+  attendance String
+
+  notes String?
+
+  fee Decimal? @db.Decimal(10, 2)
+
+  sourceRow Int?
+
+  rawData Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([uploadId])
+  @@index([lessonDate])
+  @@index([assignmentCode])
+  @@index([attendance])
+  @@index([logId])
+  // duplicate detection support
+  @@index([assignmentCode, lessonDate])
+}
+
+model Invoice {
+  id String @id @default(uuid())
+
+  uploadId String
+  upload   Upload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+
+  invoiceNumber String
+
+  tutorId String?
+
+  studentName String?
+
+  invoiceDate DateTime
+
+  amount Decimal @db.Decimal(10, 2)
+
+  paymentStatus String
+
+  paymentDate DateTime?
+
+  notes String?
+
+  sourceRow Int?
+
+  rawData Json?
+
+  createdAt DateTime @default(now())
+
+  @@unique([invoiceNumber, invoiceDate])
+  @@index([uploadId])
+  @@index([invoiceDate])
+  @@index([paymentStatus])
+  @@index([invoiceNumber])
+  // duplicate detection support
+  @@index([invoiceNumber, invoiceDate])
+}
