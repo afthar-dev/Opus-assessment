@@ -24,7 +24,7 @@ export function UploadPage() {
           Import invoice, lesson log, or tutor assignment spreadsheets.
         </p>
       </div>
-      <ErrorMessage message={error} />
+      <ErrorMessage message={error && "Wrong file type"} />
       <FileUploadPanel loading={loading} onUpload={handleUpload} />
     </section>
   );
